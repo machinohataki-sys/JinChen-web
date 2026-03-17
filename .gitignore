@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.tmp
+compress-images.mjs
+assets/images/products/regular/
+assets/images/products/premium/
+package.json
+package-lock.json
