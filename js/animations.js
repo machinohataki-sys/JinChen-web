@@ -12,6 +12,18 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
+    // Lenis integration — use Lenis-driven scroll position for ScrollTrigger
+    if (window.__lenis) {
+      ScrollTrigger.defaults({
+        scroller: window
+      });
+    }
+
+    // Global defaults — force GPU compositing on all GSAP animations
+    gsap.defaults({
+      force3d: true
+    });
+
     /* ----------------------------------------
      * Section Reveal — fade up
      * All .reveal elements animate in when scrolled into view.
@@ -19,10 +31,10 @@
      * -------------------------------------- */
     gsap.utils.toArray('.reveal').forEach(function (el) {
       gsap.from(el, {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
+        y: 30,
+        autoAlpha: 0,
+        duration: 1,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: el,
@@ -38,11 +50,11 @@
     var heroContent = document.querySelector('.hero-content');
     if (heroContent) {
       gsap.from(heroContent.children, {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: 'power2.out',
+        y: 25,
+        autoAlpha: 0,
+        duration: 1,
+        stagger: 0.12,
+        ease: 'power3.out',
         delay: 0.3
       });
     }
@@ -53,11 +65,11 @@
     var valueStrip = document.querySelector('.value-strip');
     if (valueStrip) {
       gsap.from('.value-item', {
-        y: 20,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.15,
-        ease: 'power2.out',
+        y: 15,
+        autoAlpha: 0,
+        duration: 0.8,
+        stagger: 0.12,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: valueStrip,
@@ -72,7 +84,7 @@
      * -------------------------------------- */
     var productCards = gsap.utils.toArray('.product-grid .flip-card, .product-teaser .grid > *');
     if (productCards.length) {
-      gsap.set(productCards, { autoAlpha: 0, y: 60, willChange: 'transform, opacity' });
+      gsap.set(productCards, { autoAlpha: 0, y: 40 });
 
       ScrollTrigger.batch(productCards, {
         start: 'top 92%',
@@ -81,13 +93,10 @@
           gsap.to(batch, {
             autoAlpha: 1,
             y: 0,
-            duration: 1,
-            stagger: 0.08,
-            ease: 'expo.out',
-            overwrite: true,
-            onComplete: function () {
-              batch.forEach(function (el) { el.style.willChange = 'auto'; });
-            }
+            duration: 1.2,
+            stagger: 0.06,
+            ease: 'power3.out',
+            overwrite: true
           });
         }
       });
@@ -102,14 +111,14 @@
 
       if (craftText) {
         gsap.from(craftText, {
-          x: -40,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.out',
+          x: -30,
+          autoAlpha: 0,
+          duration: 1.1,
+          ease: 'power3.out',
           immediateRender: false,
           scrollTrigger: {
             trigger: craftSection,
-            start: 'top 80%',
+            start: 'top 82%',
             toggleActions: 'play none none none'
           }
         });
@@ -117,14 +126,14 @@
 
       if (craftVisual) {
         gsap.from(craftVisual, {
-          x: 40,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.out',
+          x: 30,
+          autoAlpha: 0,
+          duration: 1.1,
+          ease: 'power3.out',
           immediateRender: false,
           scrollTrigger: {
             trigger: craftSection,
-            start: 'top 80%',
+            start: 'top 82%',
             toggleActions: 'play none none none'
           }
         });
@@ -139,11 +148,11 @@
       if (!lines.length) return;
 
       gsap.from(lines, {
-        y: 25,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
-        ease: 'power2.out',
+        y: 20,
+        autoAlpha: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: block,
@@ -158,10 +167,10 @@
      * -------------------------------------- */
     document.querySelectorAll('.cta-card').forEach(function (ctaCard) {
       gsap.from(ctaCard, {
-        scale: 0.95,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
+        scale: 0.96,
+        autoAlpha: 0,
+        duration: 1,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: ctaCard,
@@ -177,11 +186,11 @@
     var timeline = document.querySelector('.timeline');
     if (timeline) {
       gsap.from('.timeline-item', {
-        x: -30,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.12,
-        ease: 'power2.out',
+        x: -20,
+        autoAlpha: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: timeline,
@@ -196,11 +205,11 @@
      * -------------------------------------- */
     document.querySelectorAll('.why-grid').forEach(function (grid) {
       gsap.from(grid.querySelectorAll('.why-card'), {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: 'power2.out',
+        y: 25,
+        autoAlpha: 0,
+        duration: 0.9,
+        stagger: 0.08,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: grid,
@@ -216,11 +225,11 @@
     var factoryGrid = document.querySelector('.factory-grid');
     if (factoryGrid) {
       gsap.from('.factory-photo', {
-        scale: 0.9,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.15,
-        ease: 'power2.out',
+        scale: 0.95,
+        autoAlpha: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: factoryGrid,
@@ -235,11 +244,11 @@
      * -------------------------------------- */
     document.querySelectorAll('.cert-grid').forEach(function (grid) {
       gsap.from(grid.querySelectorAll('.cert-badge'), {
-        y: 20,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: 'power2.out',
+        y: 15,
+        autoAlpha: 0,
+        duration: 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
         immediateRender: false,
         scrollTrigger: {
           trigger: grid,
@@ -259,14 +268,14 @@
 
       if (contactInfo) {
         gsap.from(contactInfo, {
-          x: -40,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.out',
+          x: -30,
+          autoAlpha: 0,
+          duration: 1,
+          ease: 'power3.out',
           immediateRender: false,
           scrollTrigger: {
             trigger: contactGrid,
-            start: 'top 80%',
+            start: 'top 82%',
             toggleActions: 'play none none none'
           }
         });
@@ -274,14 +283,14 @@
 
       if (contactForm) {
         gsap.from(contactForm, {
-          x: 40,
-          opacity: 0,
-          duration: 0.8,
-          ease: 'power2.out',
+          x: 30,
+          autoAlpha: 0,
+          duration: 1,
+          ease: 'power3.out',
           immediateRender: false,
           scrollTrigger: {
             trigger: contactGrid,
-            start: 'top 80%',
+            start: 'top 82%',
             toggleActions: 'play none none none'
           }
         });

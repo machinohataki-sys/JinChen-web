@@ -60,6 +60,11 @@
         document.body.style.overflow = isOpen ? 'hidden' : '';
         hamburger.setAttribute('aria-expanded', String(isOpen));
         mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+
+        // Pause/resume Lenis smooth scroll
+        if (window.__lenis) {
+          isOpen ? window.__lenis.stop() : window.__lenis.start();
+        }
       });
 
       // Close on link click
@@ -105,7 +110,11 @@
     toggleVisibility();
 
     btn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (window.__lenis) {
+        window.__lenis.scrollTo(0, { duration: 1.5 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   }
 
@@ -130,8 +139,8 @@
     let currentGradPos = 50;
     let targetBrightness = 1.1;
     let currentBrightness = 1.1;
-    const lerp = 0.05;
-    const maxAngle = 8;
+    const lerp = 0.04;
+    const maxAngle = 6;
 
     document.addEventListener('mousemove', (e) => {
       const centerX = window.innerWidth / 2;
@@ -216,9 +225,7 @@
     if (!counters.length) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      counters.forEach((el) => {
-        el.textContent = el.getAttribute('data-target') + '+';
-      });
+      counters.forEach((el) => formatCounter(el, parseFloat(el.getAttribute('data-target'))));
       return;
     }
 
@@ -231,18 +238,45 @@
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
 
     counters.forEach((el) => observer.observe(el));
   }
 
   /**
-   * Animate a counter element from 0 to data-target
+   * Format a counter value with prefix, suffix, commas, decimals
+   * @param {HTMLElement} el
+   * @param {number} value
+   */
+  function formatCounter(el, value) {
+    const prefix = el.getAttribute('data-prefix') || '';
+    const suffix = el.getAttribute('data-suffix') || '';
+    const decimals = parseInt(el.getAttribute('data-decimals'), 10) || 0;
+    const useComma = el.getAttribute('data-format') === 'comma';
+
+    let display;
+    if (decimals > 0) {
+      display = value.toFixed(decimals);
+    } else {
+      display = Math.floor(value).toString();
+    }
+
+    if (useComma) {
+      display = display.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    el.textContent = prefix + display + suffix;
+  }
+
+  /**
+   * Animate a counter from 0 to data-target with prefix/suffix support
    * @param {HTMLElement} el
    */
   function animateCounter(el) {
-    const target = parseInt(el.getAttribute('data-target'), 10);
+    if (el.dataset.counting) return;
+    el.dataset.counting = '1';
+    const target = parseFloat(el.getAttribute('data-target'));
     const duration = 2000;
     const startTime = performance.now();
 
@@ -250,14 +284,14 @@
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(eased * target);
+      const current = eased * target;
 
-      el.textContent = current + '+';
+      formatCounter(el, current);
 
       if (progress < 1) {
         requestAnimationFrame(update);
       } else {
-        el.textContent = target + '+';
+        formatCounter(el, target);
       }
     }
 
@@ -323,9 +357,77 @@
   }
 
   /* ----------------------------------------
-   * Smooth Scroll for Anchor Links
+   * Lenis Smooth Scroll — Apple-like buttery scrolling
+   * Interpolates scroll position with lerp for 60fps silky movement.
+   * Syncs with GSAP ScrollTrigger for animation coordination.
    * -------------------------------------- */
-  function initSmoothScroll() {
+  function initLenisScroll() {
+    if (typeof Lenis === 'undefined') {
+      // Fallback: native smooth scroll for anchor links
+      initNativeSmoothScroll();
+      return;
+    }
+
+    // Skip on reduced motion preference
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      initNativeSmoothScroll();
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: function (t) {
+        return Math.min(1, 1.001 - Math.pow(2, -10 * t));
+      },
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false
+    });
+
+    // Expose globally so other scripts can access it
+    window.__lenis = lenis;
+
+    // Connect Lenis with GSAP ScrollTrigger
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      lenis.on('scroll', ScrollTrigger.update);
+
+      gsap.ticker.add(function (time) {
+        lenis.raf(time * 1000);
+      });
+
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      // Fallback RAF loop if no GSAP
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    }
+
+    // Smooth scroll for anchor links via Lenis
+    document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        const targetId = link.getAttribute('href');
+        if (targetId === '#') return;
+
+        const targetEl = document.querySelector(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          lenis.scrollTo(targetEl, { offset: 0, duration: 1.2 });
+        }
+      });
+    });
+
+    // Stop Lenis during mobile menu open
+    document.addEventListener('lenis:stop', function () { lenis.stop(); });
+    document.addEventListener('lenis:start', function () { lenis.start(); });
+  }
+
+  function initNativeSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener('click', (e) => {
         const targetId = link.getAttribute('href');
@@ -411,6 +513,6 @@
     initCountUp();
     initCardTilt();
     initFAQ();
-    initSmoothScroll();
+    initLenisScroll();
   });
 })();

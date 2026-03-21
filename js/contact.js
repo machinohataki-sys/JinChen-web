@@ -128,7 +128,7 @@
       // Submit to Formspree
       var formData = new FormData(form);
 
-      fetch('https://formspree.io/f/xvzwwenl', {
+      fetch('https://formspree.io/f/mbdzbepz', {
         method: 'POST',
         body: formData,
         headers: { 'Accept': 'application/json' }
@@ -154,7 +154,7 @@
           }
         })
         .catch(function () {
-          alert('Submission failed. Please email us directly at machinohataki@gmail.com');
+          alert('Submission failed. Please email us directly at jinchenkt@gmail.com');
         })
         .finally(function () {
           if (submitBtn) {

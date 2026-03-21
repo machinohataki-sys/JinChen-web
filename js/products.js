@@ -377,9 +377,7 @@
       var detailBtn = card.querySelector('.flip-card-back .btn-primary');
       if (!detailBtn) return;
 
-      // Prevent the link from navigating; open modal instead
       detailBtn.addEventListener('click', function (e) {
-        e.preventDefault();
         var backPanel = card.querySelector('.flip-card-back');
         var frontImage = card.querySelector('.product-card-image');
         var name = card.querySelector('.flip-card-front .product-card-title');
